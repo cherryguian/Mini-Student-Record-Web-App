@@ -32,12 +32,12 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            'student_id' => ['required', 'integer', 'unique:students,student_id'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:students,email'],
             'gender' => ['required', 'string', 'max:10'],
             'course' => ['required', 'string', 'max:255'],
             'year_level' => ['required', 'string', 'max:50'],
-            'grade' => ['required', 'string', 'max:10'],
         ]);
 
         Student::create($data);
@@ -67,12 +67,12 @@ class StudentController extends Controller
     public function update(Request $request, Student $student)
     {
         $data = $request->validate([
+            'student_id' => ['required', 'integer', 'unique:students,student_id,' . $student->id],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:students,email,' . $student->id],
             'gender' => ['required', 'string', 'max:10'],
             'course' => ['required', 'string', 'max:255'],
             'year_level' => ['required', 'string', 'max:50'],
-            'grade' => ['required', 'string', 'max:10'],
         ]);
 
         $student->update($data);
