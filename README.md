@@ -53,24 +53,55 @@ So the add-on of the code is:
 This code allows displaying all saved student records in a table. The user can select a student and edit their information or delete the record.
 
 ```tsx
-const { students } = usePage().props as { students?: Array<any> };
-const [editingId, setEditingId] = useState<number | null>(null);
+export default function Dashboard() {
+    const [formData, setFormData] = useState({
+        student_id: '',
+        name: '',
+        email: '',
+        gender: '',
+        course: '',
+        year_level: ''
+    });
+
+    const [students, setStudents] = useState<Array<any>>([]);
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [processing, setProcessing] = useState(false);
 ```
 
-On this part (the `const`) it allows the application retrieves student data from Laravel and It also uses an `editingId` to determine whether the user is adding a new student or editing an existing one.
+On this part (the const), it allows the application to store the student data and manage the student records. It also uses an editingId to determine whether the user is adding a new student or editing an existing one.
 
 ### Editing a Student Record
 
-When a student is being edited, the application uses a PUT request to update the record:
+When a student is being edited, the application uses Firebase to update the student's record.
 
 ```tsx
-if (editingId) {
-    form.put(studentRoutes.update.put(editingId).url, {
-        onSuccess: () => {
-            form.reset();
+async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setProcessing(true);
+
+    try {
+        if (editingId) {
+            const ref = doc(db, 'students', editingId);
+            await updateDoc(ref, { ...formData });
             setEditingId(null);
-        },
-    });
+        } else {
+            await addDoc(collection(db, 'students'), { ...formData });
+        }
+
+        setFormData({
+            student_id: '',
+            name: '',
+            email: '',
+            gender: '',
+            course: '',
+            year_level: ''
+        });
+    } catch (e) {
+        console.error(e);
+        alert('An error occurred while saving the student.');
+    } finally {
+        setProcessing(false);
+    }
 }
 ```
 
